@@ -20,12 +20,12 @@ class BicycleRender(ShowBase):
     rad2deg = 180. / 3.14
     def __init__(self,agent=None,env=None,show_learning=True):
         ShowBase.__init__(self)
-        # ShowBase.movie(self, namePrefix='video/SARSA',
-        #                duration=1800,
-        #                fps=1,
-        #                format='jpg',
-        #                sd=4,
-        #                source=None)
+        ShowBase.movie(self, namePrefix='images/camera1/jmage',
+                       duration=60,
+                       fps=60,
+                       format='jpg',
+                       sd=4,
+                       source=None)
 
         self.agent = agent
         self.env=env
@@ -41,11 +41,9 @@ class BicycleRender(ShowBase):
             self.theta_index = 0
         self.elapsed_time = 0
 
-        self.tiltText = self.genLabelText("Bike tilt", 1)
-        self.distText = self.genLabelText("Distance to goal", 2)
-        self.rewardText = self.genLabelText("Current reward", 3)
-        if self.show_learning:
-            self.thetaText = self.genLabelText("After 0 episodes...", 10, scale=0.10)
+        self.omegaText = self.genLabelText("", 1)
+        self.thetaText = self.genLabelText("", 2)
+        self.timeText = self.genLabelText("", 3)
 
         self.wheel_roll = 0
         self.torque = 0
@@ -68,7 +66,7 @@ class BicycleRender(ShowBase):
 
         self.rear_wheel = self.loader.loadModel("maps/wheel3.egg")
         self.rear_wheel.reparentTo(self.render)
-        self.rear_wheel.setPos(0, 0, self.bicycle.r)#self.bike.r)
+        self.rear_wheel.setPos(0, 0, self.bicycle.r)
 
         self.frame = self.loader.loadModel("maps/frame.egg")
         self.frame.reparentTo(self.rear_wheel)
@@ -85,12 +83,9 @@ class BicycleRender(ShowBase):
         self.goalPost = self.loader.loadModel("maps/fork.egg")
         self.goalPost.reparentTo(self.render)
 
-        # self.goalPost.setPos(self.bike.x_goal,self.bike.y_goal, 0)
-
         self.fork = self.loader.loadModel("maps/fork.egg")
         self.fork.reparentTo(self.frame)
         self.fork.setColor(0, 0, 1)
-        ## 1 unit in the scaled space of this node is self.bike.L in self.render
         self.fork.setPos(0, self.bicycle.L, self.bicycle.r)
 
         self.front_wheel = self.loader.loadModel("maps/wheel3.egg")
@@ -120,6 +115,7 @@ class BicycleRender(ShowBase):
 
     # Define a procedure to move the camera.
     def followBikeTask(self, task):
+        #camera 1
         look = self.rear_wheel.getPos()
         self.camera.lookAt(look[0], look[1], look[2] + 1.0)
         self.camera.setPos(look[0] - 1.0, look[1] - 6.0, look[2] + 2.0)
@@ -137,26 +133,13 @@ class BicycleRender(ShowBase):
 
     def simulateBicycleTask(self, task):
         self.elapsed_time += self.bicycle.time_step
-        # # update text parameters
-        # if self.task.goto:
-        #     diststr = "Distance to goal    = %3.3f" % (self.task.calc_dist_to_goal())
 
-        diststr = "Elapsed time = %3.3f" % (self.elapsed_time)
-        tiltstr = "Tilt = %3.3f" % (self.bicycle.omega)
-        rewardstr = "Reward = %3.3f" % (0)
-        self.tiltText.setText(tiltstr)
-        self.distText.setText(diststr)
-        self.rewardText.setText(rewardstr)
-        # if self.show_learning:
-        #     thetastr     = "After %i episodes..." % self.theta_index
-        #     self.thetaText.setText(thetastr)
-
-
-        # if self.show_learning and self.elapsed_time > 7.0:
-        #     self.elapsed_time = 0
-        #     self.set_theta_to_next_file()
-        #     self.bike.reset()
-
+        elapsedstr = "Elapsed time = %3.3f" % (self.elapsed_time)
+        tiltstr = "Omega = %3.3f" % (self.bicycle.omega*180/np.pi)
+        thetastr = "Theta = %3.3f" % (self.bicycle.theta*180/np.pi)
+        self.omegaText.setText(tiltstr)
+        self.thetaText.setText(thetastr)
+        self.timeText.setText(elapsedstr)
 
         state, reward, done, _ = self.env.step(self.action)
         state = state[np.newaxis]
@@ -166,9 +149,12 @@ class BicycleRender(ShowBase):
             self.rear_wheel.setPos(self.bicycle.xb, self.bicycle.yb, self.bicycle.r)
             self.rear_wheel.setP(-self.rad2deg * self.wheel_roll)
             self.rear_wheel.setR(self.rad2deg * self.bicycle.omega)
+
+
             self.frame.setP(self.rad2deg * self.wheel_roll)
             self.butt.setX(0)
             self.fork.setH(self.rad2deg * self.bicycle.theta)
+
             self.front_wheel.setP(-self.rad2deg * self.wheel_roll)
 
             self.action = self.agent.action(state)

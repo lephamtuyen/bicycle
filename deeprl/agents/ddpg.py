@@ -171,13 +171,13 @@ class DDPG(BaseAgent):
                 if "Bicycle" in self.env_name:
                     back_trajectory.append([self.env.env.get_xbhist(), self.env.env.get_ybhist()])
                     front_trajectory.append([self.env.env.get_xfhist(), self.env.env.get_yfhist()])
-                    terms = self.env.env.getRewardTerm()
-                    term1.append(terms[0])
-                    term2.append(terms[1])
-                    term3.append(terms[2])
-                    term4.append(terms[3])
-                    velocity.append(self.env.env.get_vhist())
-                    printed_states.append(self.env.env.get_shist())
+                    # terms = self.env.env.getRewardTerm()
+                    # term1.append(terms[0])
+                    # term2.append(terms[1])
+                    # term3.append(terms[2])
+                    # term4.append(terms[3])
+                    # velocity.append(self.env.env.get_vhist())
+                    # printed_states.append(self.env.env.get_shist())
                     # goals.append(self.env.env.get_goal())
 
             # if "Bicycle-v0" in self.env_name and per_game_step==self.max_step_per_game:
